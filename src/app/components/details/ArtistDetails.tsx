@@ -16,17 +16,9 @@ export interface ArtistDetailsProps {
     onAlbumClick: (album: Album) => void;
 }
 
-export default function ArtistDetails({ artist }: ArtistDetailsProps) {
-    const { isAuthenticated } = useSpotifyAuth();
-    const spotifyPlayer = isAuthenticated ? useSpotifyPlayer() : null;
-    
-    // Provide default values when destructuring
-    const { 
-        playTrack = () => Promise.resolve(), 
-        togglePlay = () => Promise.resolve(), 
-        currentTrack = null, 
-        isPaused = false 
-    } = spotifyPlayer || {};
+function ArtistDetailsWithPlayback({ artist }: ArtistDetailsProps) {
+    const spotifyPlayer = useSpotifyPlayer();
+    const { playTrack, togglePlay, currentTrack, isPaused } = spotifyPlayer;
 
     const [topTracks, setTopTracks] = useState<Track[]>([]);
     const [albums, setAlbums] = useState<Album[]>([]);
@@ -39,55 +31,42 @@ export default function ArtistDetails({ artist }: ArtistDetailsProps) {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
 
-    // Fetch artist top tracks
     useEffect(() => {
-        async function fetchTopTracks() {
+        async function fetchData() {
+            setLoadingTracks(true);
+            setLoadingAlbums(true);
+            
             try {
-                const res = await fetch(
-                    `/api/spotify/artist/${artist.id}/top-tracks?country=US`
-                );
-                const data = await res.json();
-                setTopTracks(data.tracks || []);
+                const [tracksRes, albumsRes] = await Promise.all([
+                    fetch(`/api/spotify/artist/${artist.id}/top-tracks?country=US`),
+                    fetch(`/api/spotify/artist/${artist.id}/albums?country=US`)
+                ]);
+                
+                const [tracksData, albumsData] = await Promise.all([
+                    tracksRes.json(),
+                    albumsRes.json()
+                ]);
+                
+                setTopTracks(tracksData.tracks || []);
+                setAlbums(albumsData.items || []);
             } catch (error) {
-                console.error('Error fetching top tracks', error);
+                console.error('Error fetching artist data:', error);
             } finally {
                 setLoadingTracks(false);
-            }
-        }
-        fetchTopTracks();
-    }, [artist.id]);
-
-    // Fetch artist albums
-    useEffect(() => {
-        async function fetchAlbums() {
-            try {
-                const res = await fetch(
-                    `/api/spotify/artist/${artist.id}/albums?include_groups=album,single,compilation&market=US&limit=50`
-                );
-                const data = await res.json();
-                setAlbums(data.items || []);
-            } catch (error) {
-                console.error('Error fetching albums', error);
-            } finally {
                 setLoadingAlbums(false);
             }
         }
-        fetchAlbums();
+        
+        fetchData();
     }, [artist.id]);
 
     const handleTrackClick = useCallback((track: Track) => {
-        if (!isAuthenticated) {
-            // Show login prompt if not authenticated
-            alert('Please log in to play tracks');
-            return;
-        }
-        
         if (currentTrack?.id === track.id) {
             togglePlay?.();
         } else {
             playTrack?.(`spotify:track:${track.id}`);
         }
-    }, [currentTrack, playTrack, togglePlay, isAuthenticated]);
+    }, [currentTrack, playTrack, togglePlay]);
 
     // Sort and filter albums
     const sortedAlbums = [...albums].sort((a, b) => {
@@ -121,16 +100,12 @@ export default function ArtistDetails({ artist }: ArtistDetailsProps) {
                                 className="object-cover rounded"
                             />
                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                                {isAuthenticated ? (
-                                    currentTrack?.id === track.id ? (
-                                        <button className="p-2 bg-green-500 rounded-full">
-                                            {isPaused ? "▶️" : "⏸️"}
-                                        </button>
-                                    ) : (
-                                        <button className="p-2 bg-green-500 rounded-full">▶️</button>
-                                    )
+                                {currentTrack?.id === track.id ? (
+                                    <button className="p-2 bg-green-500 rounded-full">
+                                        {isPaused ? "▶️" : "⏸️"}
+                                    </button>
                                 ) : (
-                                    <button className="p-2 bg-gray-500 rounded-full" title="Login to play">🔒</button>
+                                    <button className="p-2 bg-green-500 rounded-full">▶️</button>
                                 )}
                             </div>
                         </div>
@@ -213,7 +188,7 @@ export default function ArtistDetails({ artist }: ArtistDetailsProps) {
     return (
         <div className="space-y-8">
             {/* Login prompt for unauthenticated users */}
-            {!isAuthenticated && (
+            {!spotifyPlayer && (
                 <div className="bg-white/5 p-4 rounded-lg mb-4">
                     <div className="flex items-center justify-between">
                         <p className="text-yellow-400">
@@ -342,5 +317,67 @@ export default function ArtistDetails({ artist }: ArtistDetailsProps) {
                 </div>
             )}
         </div>
+    );
+}
+
+function ReadOnlyArtistDetails({ artist }: ArtistDetailsProps) {
+    const [topTracks, setTopTracks] = useState<Track[]>([]);
+    const [loadingTracks, setLoadingTracks] = useState(true);
+
+    useEffect(() => {
+        async function fetchTopTracks() {
+            try {
+                const res = await fetch(
+                    `/api/spotify/artist/${artist.id}/top-tracks?country=US`
+                );
+                const data = await res.json();
+                setTopTracks(data.tracks || []);
+            } catch (error) {
+                console.error('Error fetching top tracks', error);
+            } finally {
+                setLoadingTracks(false);
+            }
+        }
+        fetchTopTracks();
+    }, [artist.id]);
+
+    return (
+        <div className="space-y-4">
+            <div className="bg-white/5 p-4 rounded-lg mb-4">
+                <div className="flex items-center justify-between">
+                    <p className="text-yellow-400">
+                        👋 You&apos;re viewing in read-only mode. Connect with Spotify to enable full playback.
+                    </p>
+                    <SpotifyLoginButton />
+                </div>
+            </div>
+            <h2 className="text-3xl font-bold">{artist.name}</h2>
+            {loadingTracks ? (
+                <p>Loading top tracks...</p>
+            ) : (
+                <ul className="space-y-2">
+                    {topTracks.map((track) => (
+                        <li key={track.id}>{track.name}</li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+}
+
+export default function ArtistDetails({ artist }: ArtistDetailsProps) {
+    const { isAuthenticated } = useSpotifyAuth();
+    return isAuthenticated ? (
+        <ArtistDetailsWithPlayback artist={artist} onTrackClick={function (): void {
+            throw new Error('Function not implemented.');
+        } } onAlbumClick={function (): void {
+            throw new Error('Function not implemented.');
+        } } />
+    ) : (
+        <ReadOnlyArtistDetails artist={artist} onTrackClick={function (): void {
+                throw new Error('Function not implemented.');
+            } } onAlbumClick={function (): void {
+                throw new Error('Function not implemented.');
+            } } />
     );
 }
