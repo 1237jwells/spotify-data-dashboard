@@ -31,7 +31,7 @@ async function getAccessToken() {
 }
 
 // Helper function to optimize image arrays
-function optimizeImages(images: any[]) {
+function optimizeImages(images: Artist['images']) {
   if (!Array.isArray(images) || images.length === 0) {
     return null;
   }
@@ -40,10 +40,10 @@ function optimizeImages(images: any[]) {
 }
 
 // Helper to optimize artist data
-function optimizeArtistData(artist: any): Artist | undefined {
+function optimizeArtistData(artist: Partial<Artist>): Artist | undefined {
   if (!artist?.id || !artist?.name) return undefined;
   try {
-    const optimizedImage = optimizeImages(artist.images);
+    const optimizedImage = optimizeImages(artist.images || []);
     return {
       id: artist.id,
       name: artist.name,
@@ -61,28 +61,28 @@ function optimizeArtistData(artist: any): Artist | undefined {
 }
 
 // Helper to optimize track data
-function optimizeTrackData(track: any): Track | undefined {
-  if (!track?.id || !track?.name || !track?.album) return undefined;
-  try {
-    const optimizedImage = optimizeImages(track.album.images);
-    return {
-      id: track.id,
-      name: track.name,
-      artists: (track.artists || []).map((a: any) => ({ name: a.name || 'Unknown Artist' })),
-      album: {
-        name: track.album.name || 'Unknown Album',
-        images: optimizedImage ? [optimizedImage] : []
-      },
-      duration_ms: track.duration_ms || 0,
-      preview_url: track.preview_url || null,
-      type: track.type || 'track',
-      uri: track.uri || ''
-    };
-  } catch (error) {
-    console.error('Error optimizing track data:', error);
-    return undefined;
-  }
-}
+// function optimizeTrackData(track: Partial<Track>): Track | undefined {
+//   if (!track?.id || !track?.name || !track?.album) return undefined;
+//   try {
+//     const optimizedImage = optimizeImages(track.album?.images || []);
+//     return {
+//       id: track.id,
+//       name: track.name,
+//       artists: (track.artists || []).map((a: Partial<Artist>) => ({ name: a.name || 'Unknown Artist' })),
+//       album: {
+//         name: track.album.name || 'Unknown Album',
+//         images: optimizedImage ? [optimizedImage] : []
+//       },
+//       duration_ms: track.duration_ms || 0,
+//       preview_url: track.preview_url || null,
+//       type: track.type || 'track',
+//       uri: track.uri || ''
+//     };
+//   } catch (error) {
+//     console.error('Error optimizing track data:', error);
+//     return undefined;
+//   }
+// }
 
 export async function GET() {
   try {
@@ -123,12 +123,12 @@ export async function GET() {
     }
 
     // Process the track data (and extract artists from these tracks if needed)
-    const tracks = tracksData.items.map((item: any) => item.track).filter((track: Track | undefined): track is Track => track !== undefined);
+    const tracks = tracksData.items.map((item: { track?: Track }) => item.track).filter((track: Track | undefined): track is Track => track !== undefined);
 
     // For artists, as an example, de-duplicate artists from the trending tracks
     const artistMap: Record<string, Artist> = {};
-    tracksData.items.forEach((item: any) => {
-      item.track?.artists.forEach((a: any) => {
+    tracksData.items.forEach((item: { track?: Track }) => {
+      item.track?.artists.forEach((a: Partial<Artist>) => {
         const optimizedArtist = optimizeArtistData(a);
         if (optimizedArtist && !artistMap[optimizedArtist.id]) {
           artistMap[optimizedArtist.id] = optimizedArtist;

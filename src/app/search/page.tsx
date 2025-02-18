@@ -1,10 +1,11 @@
 "use client";
 
+import { Artist } from "@/types/spotify";
 import { useState } from "react";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<Artist[] | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSearch(e: React.FormEvent) {
@@ -16,7 +17,7 @@ export default function SearchPage() {
     // Now fetch top artists sorted by followers
     const res = await fetch(`/api/spotify/top-artists?q=${encodeURIComponent(query)}`);
     const data = await res.json();
-    setResults(data);
+    setResults(data.artists);
     setLoading(false);
   }
 
@@ -37,11 +38,11 @@ export default function SearchPage() {
 
       {loading && <p className="mt-4">Loading...</p>}
 
-      {results && results.artists && (
+      {results && (
         <div className="mt-4">
           {/* Display the top 10 artists */}
           <ul>
-            {results.artists.map((artist: any) => (
+            {results.map((artist: Artist) => (
               <li key={artist.id}>
                 <strong>{artist.name}</strong> — Followers: {artist.followers.total}
               </li>

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Artist, Track, Album } from '@/types/spotify';
 import AlbumDetails from '@/app/components/details/AlbumDetails';
@@ -10,14 +10,24 @@ import { useSpotifyPlayer } from '@/app/context/SpotifyPlayerContext';
 import { useSpotifyAuth } from "@/app/context/SpotifyAuthContext";
 import SpotifyLoginButton from '@/app/components/SpotifyLoginButton';
 
-type ArtistDetailsProps = {
+export interface ArtistDetailsProps {
     artist: Artist;
     onTrackClick: (track: Track) => void;
     onAlbumClick: (album: Album) => void;
-};
+}
 
-export default function ArtistDetails({ artist, onTrackClick, onAlbumClick }: ArtistDetailsProps) {
+export default function ArtistDetails({ artist }: ArtistDetailsProps) {
     const { isAuthenticated } = useSpotifyAuth();
+    const spotifyPlayer = isAuthenticated ? useSpotifyPlayer() : null;
+    
+    // Provide default values when destructuring
+    const { 
+        playTrack = () => Promise.resolve(), 
+        togglePlay = () => Promise.resolve(), 
+        currentTrack = null, 
+        isPaused = false 
+    } = spotifyPlayer || {};
+
     const [topTracks, setTopTracks] = useState<Track[]>([]);
     const [albums, setAlbums] = useState<Album[]>([]);
     const [loadingTracks, setLoadingTracks] = useState(true);
@@ -28,10 +38,6 @@ export default function ArtistDetails({ artist, onTrackClick, onAlbumClick }: Ar
     const [artistDialog, setArtistDialog] = useState<Artist | null>(null);
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
-
-    // Only use SpotifyPlayer when authenticated
-    const spotifyPlayer = isAuthenticated ? useSpotifyPlayer() : null;
-    const { playTrack, togglePlay, currentTrack, isPaused, isReady } = spotifyPlayer || {};
 
     // Fetch artist top tracks
     useEffect(() => {
@@ -211,7 +217,7 @@ export default function ArtistDetails({ artist, onTrackClick, onAlbumClick }: Ar
                 <div className="bg-white/5 p-4 rounded-lg mb-4">
                     <div className="flex items-center justify-between">
                         <p className="text-yellow-400">
-                            👋 You're viewing in read-only mode. Connect with Spotify to enable full playback.
+                            👋 You&apos;re viewing in read-only mode. Connect with Spotify to enable full playback.
                         </p>
                         <SpotifyLoginButton />
                     </div>

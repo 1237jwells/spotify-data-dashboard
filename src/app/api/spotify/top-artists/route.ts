@@ -13,8 +13,9 @@ export async function GET(request: Request) {
     const accessToken = await getAccessToken();
     const artists = await getTop10ArtistsByFollowers(query, accessToken);
     return NextResponse.json({ artists });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching top artists:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unexpected error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
-} 
+}

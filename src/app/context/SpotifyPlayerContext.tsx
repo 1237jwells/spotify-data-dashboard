@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import { WindowWithSpotify } from '@/types/spotify-web-playback';
 
 // Type definitions for Spotify Web Playback SDK
 interface WebPlaybackTrack {
@@ -21,7 +22,9 @@ interface WebPlaybackTrack {
 interface WebPlaybackState {
   context: {
     uri: string;
-    metadata: any;
+    metadata: {
+      images: { url: string }[];
+    };
   };
   disallows: {
     pausing: boolean;
@@ -46,8 +49,8 @@ interface WebPlaybackState {
 interface WebPlaybackPlayer {
   connect: () => Promise<boolean>;
   disconnect: () => void;
-  addListener: (eventName: string, callback: (state: any) => void) => void;
-  removeListener: (eventName: string, callback: (state: any) => void) => void;
+  addListener: (eventName: string, callback: (state: WebPlaybackState) => void) => void;
+  removeListener: (eventName: string, callback: (state: WebPlaybackState) => void) => void;
   togglePlay: () => Promise<void>;
   getCurrentState: () => Promise<WebPlaybackState | null>;
   setVolume: (volume: number) => Promise<void>;
@@ -93,8 +96,8 @@ export function SpotifyPlayerProvider({ children, accessToken }: SpotifyPlayerPr
 
     document.body.appendChild(script);
 
-    (window as any).onSpotifyWebPlaybackSDKReady = () => {
-      const player = new (window as any).Spotify.Player({
+    (window as unknown as { onSpotifyWebPlaybackSDKReady: () => void }).onSpotifyWebPlaybackSDKReady = () => {
+      const player = new (window as unknown as WindowWithSpotify).Spotify.Player({
         name: 'Spotify Data Dashboard',
         getOAuthToken: (cb: (token: string) => void) => { cb(accessToken); },
         volume: 0.5
@@ -133,7 +136,7 @@ export function SpotifyPlayerProvider({ children, accessToken }: SpotifyPlayerPr
         player.disconnect();
       }
     };
-  }, [accessToken]);
+  }, [accessToken, player]);
 
   const playTrack = useCallback(async (trackUri: string) => {
     if (!deviceId) {

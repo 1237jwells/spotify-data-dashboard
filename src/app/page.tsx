@@ -17,6 +17,12 @@ type DetailView = {
   data: Track | Artist | Album;
 } | null;
 
+interface SearchResults {
+  tracks?: { items: Track[] };
+  artists?: { items: Artist[] };
+  albums?: { items: Album[] };
+}
+
 const SkeletonTrackCard = () => {
   return (
     <div className="animate-pulse bg-white/5 p-4 rounded-lg">
@@ -50,7 +56,7 @@ export default function Home() {
   const { isAuthenticated } = useSpotifyAuth();
   const [query, setQuery] = useState("");
   const [searchType, setSearchType] = useState<SearchType>("track");
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
   const [detailView, setDetailView] = useState<DetailView>(null);
 
@@ -85,14 +91,22 @@ export default function Home() {
 
   function renderResults() {
     if (!results) return null;
+    let items;
+    switch (searchType) {
+      case "track":
+        items = results?.tracks?.items;
+        break;
+      case "artist":
+        items = results?.artists?.items;
+        break;
+      case "album":
+        items = results?.albums?.items;
+        break;
+      default:
+        items = null;
+    }
 
-    const items = {
-      track: results.tracks?.items,
-      artist: results.artists?.items,
-      album: results.albums?.items,
-    }[searchType];
-
-    if (!items?.length) {
+    if (!items || !items.length) {
       return <p className="text-center text-gray-500">No results found</p>;
     }
 
@@ -178,7 +192,7 @@ export default function Home() {
         </div>
         <h1 className="text-4xl font-bold">Spotify Data Dashboard</h1>
         <p className="mt-2 text-lg max-w-2xl mx-auto">
-          Discover and search through Spotify's rich data. Explore tracks, artists, and albums like never before.
+          Discover and search through Spotifyx&apos;s rich data. Explore tracks, artists, and albums like never before.
           {!isAuthenticated && (
             <span className="block mt-2 text-sm text-gray-400">
               Connect with Spotify to enable full playback features

@@ -1,32 +1,15 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { SpotifyAuthProvider, useSpotifyAuth } from './context/SpotifyAuthContext';
-import { SpotifyPlayerProvider } from './context/SpotifyPlayerContext';
-import SpotifyPlayer from './components/SpotifyPlayer';
-
-function AuthenticatedProviders({ children }: { children: ReactNode }) {
-  const { isAuthenticated, accessToken } = useSpotifyAuth();
-
-  // Wrap children with SpotifyPlayerProvider if authenticated.
-  if (isAuthenticated && accessToken) {
-    return (
-      <SpotifyPlayerProvider accessToken={accessToken}>
-        {children}
-      </SpotifyPlayerProvider>
-    );
-  }
-
-  return <>{children}</>;
-}
+import { SpotifyAuthProvider } from './context/SpotifyAuthContext';
+import SpotifyPlayerWrapper from './components/SpotifyPlayerWrapper';
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
     <SpotifyAuthProvider>
-      <AuthenticatedProviders>
+      <SpotifyPlayerWrapper>
         {children}
-      </AuthenticatedProviders>
-      <SpotifyPlayer />
+      </SpotifyPlayerWrapper>
     </SpotifyAuthProvider>
   );
 }

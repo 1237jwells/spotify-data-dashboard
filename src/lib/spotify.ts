@@ -1,3 +1,5 @@
+import { Artist } from "@/types/spotify";
+
 const SPOTIFY_CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET;
 
@@ -46,6 +48,5 @@ export async function getTop10ArtistsByFollowers(query: string, accessToken: str
 
   const data = await response.json();
   const artists = data.artists.items;
-  const sortedArtists = artists.sort((a: any, b: any) => b.followers.total - a.followers.total);
-  return sortedArtists.slice(0, 10);
+  const sortedArtists = artists.sort((a: Artist, b: Artist) => b.followers.total - a.followers.total);  return sortedArtists.slice(0, 10);
 } 

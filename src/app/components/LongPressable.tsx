@@ -19,7 +19,7 @@ export default function LongPressable({
   const longPressTriggered = useRef(false);
 
   const start = useCallback(
-    (event: React.MouseEvent | React.TouchEvent) => {
+    () => {
       // Reset flag at the start.
       longPressTriggered.current = false;
       timeoutRef.current = setTimeout(() => {
@@ -32,7 +32,7 @@ export default function LongPressable({
   );
 
   const clear = useCallback(
-    (event: React.MouseEvent | React.TouchEvent) => {
+    () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;

@@ -10,7 +10,7 @@ type DataDialogProps = {
 };
 
 export default function DataDialog({ data, onClose }: DataDialogProps) {
-  const [showMore, setShowMore] = useState(false);
+  const [, setShowMore] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'details'>('overview');
 
@@ -225,7 +225,7 @@ export default function DataDialog({ data, onClose }: DataDialogProps) {
                 <>
                   <h3 className="text-lg font-semibold">About the Track</h3>
                   <p className="text-gray-400">
-                    This track is from the album "{data.album.name}" by {data.artists.map(a => a.name).join(', ')}.
+                    This track is from the album &quot;{data.album.name}&quot; by {data.artists.map(a => a.name).join(', ')}.
                   </p>
                 </>
               )}

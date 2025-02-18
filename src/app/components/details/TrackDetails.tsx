@@ -19,7 +19,6 @@ export default function TrackDetails({ track }: TrackDetailsProps) {
     togglePlay,
     currentTrack,
     isPaused,
-    isActive,
     isReady,
     error
   } = spotifyPlayer || {};
@@ -58,7 +57,7 @@ export default function TrackDetails({ track }: TrackDetailsProps) {
         <div className="bg-white/5 p-4 rounded-lg mb-4">
           <div className="flex items-center justify-between">
             <p className="text-yellow-400">
-              👋 You're viewing in read-only mode. Connect with Spotify to enable full playback.
+              👋 You&apos;re viewing in read-only mode. Connect with Spotify to enable full playback.
             </p>
             <SpotifyLoginButton />
           </div>
@@ -100,7 +99,7 @@ export default function TrackDetails({ track }: TrackDetailsProps) {
                 )}
                 {!isReady && (
                   <p className="text-yellow-500 text-sm mt-2">
-                    Connecting to Spotify... Make sure you're logged in with a Premium account.
+                    Connecting to Spotify... Make sure you&apos;re logged in with a Premium account.
                   </p>
                 )}
               </>
