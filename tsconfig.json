@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/Skeletons"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/Skeletons", "src/app/api/spotify/artist/[id]/albums/route.js", "src/app/api/spotify/trending/route.js", "src/app/api/spotify/route.js"],
   "exclude": ["node_modules"]
 }

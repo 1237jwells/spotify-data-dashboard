@@ -16,7 +16,7 @@ async function getAccessToken() {
   return data.access_token;
 }
 
-export async function GET(request: Request) {
+export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
@@ -49,6 +49,6 @@ export async function GET(request: Request) {
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error in API route:', error);
-    return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 } 

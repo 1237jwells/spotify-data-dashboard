@@ -5,7 +5,7 @@ import { useState } from "react";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Artist[] | null>(null);
+  const [results] = useState<Artist[] | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSearch(e: React.FormEvent) {
@@ -15,9 +15,9 @@ export default function SearchPage() {
     
     setLoading(true);
     // Now fetch top artists sorted by followers
-    const res = await fetch(`/api/spotify/top-artists?q=${encodeURIComponent(query)}`);
-    const data = await res.json();
-    setResults(data.artists);
+    // const res = await fetch(`/api/spotify/top-artists?q=${encodeURIComponent(query)}`);
+    // const data = await res.json();
+    // setResults(data.artists);
     setLoading(false);
   }
 

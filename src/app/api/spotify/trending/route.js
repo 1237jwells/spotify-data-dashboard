@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { Artist, Track } from '@/types/spotify';
 
 const SPOTIFY_CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET;
@@ -31,7 +30,7 @@ async function getAccessToken() {
 }
 
 // Helper function to optimize image arrays
-function optimizeImages(images: Artist['images']) {
+function optimizeImages(images) {
   if (!Array.isArray(images) || images.length === 0) {
     return null;
   }
@@ -40,7 +39,7 @@ function optimizeImages(images: Artist['images']) {
 }
 
 // Helper to optimize artist data
-function optimizeArtistData(artist: Partial<Artist>): Artist | undefined {
+function optimizeArtistData(artist) {
   if (!artist?.id || !artist?.name) return undefined;
   try {
     const optimizedImage = optimizeImages(artist.images || []);
@@ -123,12 +122,12 @@ export async function GET() {
     }
 
     // Process the track data (and extract artists from these tracks if needed)
-    const tracks = tracksData.items.map((item: { track?: Track }) => item.track).filter((track: Track | undefined): track is Track => track !== undefined);
+    const tracks = tracksData.items.map((item) => item.track).filter((track) => track !== undefined);
 
     // For artists, as an example, de-duplicate artists from the trending tracks
-    const artistMap: Record<string, Artist> = {};
-    tracksData.items.forEach((item: { track?: Track }) => {
-      item.track?.artists.forEach((a: Partial<Artist>) => {
+    const artistMap = {};
+    tracksData.items.forEach((item) => {
+      item.track?.artists.forEach((a) => {
         const optimizedArtist = optimizeArtistData(a);
         if (optimizedArtist && !artistMap[optimizedArtist.id]) {
           artistMap[optimizedArtist.id] = optimizedArtist;

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { Artist, Track, Album } from '@/types/spotify';
 import AlbumDetails from '@/app/components/details/AlbumDetails';
@@ -20,10 +20,10 @@ function ArtistDetailsWithPlayback({ artist }: ArtistDetailsProps) {
     const spotifyPlayer = useSpotifyPlayer();
     const { playTrack, togglePlay, currentTrack, isPaused } = spotifyPlayer;
 
-    const [topTracks, setTopTracks] = useState<Track[]>([]);
-    const [albums, setAlbums] = useState<Album[]>([]);
-    const [loadingTracks, setLoadingTracks] = useState(true);
-    const [loadingAlbums, setLoadingAlbums] = useState(true);
+    const [topTracks] = useState<Track[]>([]);
+    const [albums] = useState<Album[]>([]);
+    const [loadingTracks] = useState(true);
+    const [loadingAlbums] = useState(true);
     const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
     const [albumDialog, setAlbumDialog] = useState<Album | null>(null);
     const [trackDialog, setTrackDialog] = useState<Track | null>(null);
@@ -31,34 +31,39 @@ function ArtistDetailsWithPlayback({ artist }: ArtistDetailsProps) {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
 
-    useEffect(() => {
-        async function fetchData() {
-            setLoadingTracks(true);
-            setLoadingAlbums(true);
+    // useEffect(() => {
+    //     async function fetchData() {
+    //         setLoadingTracks(true);
+    //         setLoadingAlbums(true);
             
-            try {
-                const [tracksRes, albumsRes] = await Promise.all([
-                    fetch(`/api/spotify/artist/${artist.id}/top-tracks?country=US`),
-                    fetch(`/api/spotify/artist/${artist.id}/albums?country=US`)
-                ]);
+    //         try {
+    //             const [tracksRes, 
+    //                 // albumsRes
+    //             ] = await Promise.all([
+    //                 fetch(`/api/spotify/artist/${artist.id}/top-tracks?country=US`),
+    //                 fetch(`/api/spotify/artist/${artist.id}/albums?country=US`)
+    //             ]);
                 
-                const [tracksData, albumsData] = await Promise.all([
-                    tracksRes.json(),
-                    albumsRes.json()
-                ]);
+    //             const [tracksData, 
+    //                 // albumsData
                 
-                setTopTracks(tracksData.tracks || []);
-                setAlbums(albumsData.items || []);
-            } catch (error) {
-                console.error('Error fetching artist data:', error);
-            } finally {
-                setLoadingTracks(false);
-                setLoadingAlbums(false);
-            }
-        }
+    //             ] = await Promise.all([
+    //                 tracksRes.json(),
+    //                 // albumsRes.json()
+    //             ]);
+                
+    //             setTopTracks(tracksData.tracks || []);
+    //             // setAlbums(albumsData.items || []);
+    //         } catch (error) {
+    //             console.error('Error fetching artist data:', error);
+    //         } finally {
+    //             setLoadingTracks(false);
+    //             setLoadingAlbums(false);
+    //         }
+    //     }
         
-        fetchData();
-    }, [artist.id]);
+    //     fetchData();
+    // }, [artist.id]);
 
     const handleTrackClick = useCallback((track: Track) => {
         if (currentTrack?.id === track.id) {
@@ -321,25 +326,25 @@ function ArtistDetailsWithPlayback({ artist }: ArtistDetailsProps) {
 }
 
 function ReadOnlyArtistDetails({ artist }: ArtistDetailsProps) {
-    const [topTracks, setTopTracks] = useState<Track[]>([]);
-    const [loadingTracks, setLoadingTracks] = useState(true);
+    // const [topTracks, setTopTracks] = useState<Track[]>([]);
+    // const [loadingTracks, setLoadingTracks] = useState(true);
 
-    useEffect(() => {
-        async function fetchTopTracks() {
-            try {
-                const res = await fetch(
-                    `/api/spotify/artist/${artist.id}/top-tracks?country=US`
-                );
-                const data = await res.json();
-                setTopTracks(data.tracks || []);
-            } catch (error) {
-                console.error('Error fetching top tracks', error);
-            } finally {
-                setLoadingTracks(false);
-            }
-        }
-        fetchTopTracks();
-    }, [artist.id]);
+    // useEffect(() => {
+    //     async function fetchTopTracks() {
+    //         try {
+    //             const res = await fetch(
+    //                 `/api/spotify/artist/${artist.id}/top-tracks?country=US`
+    //             );
+    //             const data = await res.json();
+    //             setTopTracks(data.tracks || []);
+    //         } catch (error) {
+    //             console.error('Error fetching top tracks', error);
+    //         } finally {
+    //             setLoadingTracks(false);
+    //         }
+    //     }
+    //     fetchTopTracks();
+    // }, [artist.id]);
 
     return (
         <div className="space-y-4">
@@ -352,7 +357,7 @@ function ReadOnlyArtistDetails({ artist }: ArtistDetailsProps) {
                 </div>
             </div>
             <h2 className="text-3xl font-bold">{artist.name}</h2>
-            {loadingTracks ? (
+            {/* {loadingTracks ? (
                 <p>Loading top tracks...</p>
             ) : (
                 <ul className="space-y-2">
@@ -360,7 +365,7 @@ function ReadOnlyArtistDetails({ artist }: ArtistDetailsProps) {
                         <li key={track.id}>{track.name}</li>
                     ))}
                 </ul>
-            )}
+            )} */}
         </div>
     );
 }

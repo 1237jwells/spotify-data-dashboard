@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { TrackCard, ArtistCard, AlbumCard } from "@/components/ResultCards";
 import TrendingSidebar from "@/app/components/TrendingSidebar";
 import TrackDetails from "@/app/components/details/TrackDetails";
@@ -60,7 +60,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [detailView, setDetailView] = useState<DetailView>(null);
 
-  async function fetchResults() {
+  const fetchResults = useCallback(async () => {
     if (!query) {
       setResults(null);
       setLoading(false);
@@ -71,7 +71,7 @@ export default function Home() {
     const data = await res.json();
     setResults(data);
     setLoading(false);
-  }
+  }, [query, searchType]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -79,7 +79,7 @@ export default function Home() {
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query, searchType]);
+  }, [fetchResults]);
 
   function handleItemClick(type: SearchType, item: Track | Artist | Album) {
     setDetailView({ type, data: item });
